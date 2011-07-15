@@ -16,7 +16,7 @@ dependencies {
 	compile 'org.apache.hadoop:hadoop-core:0.20.2'
 }
 
-task(dependsOn: classes, type: Jar, 'hadoopJar') {
+task(dependsOn: jar, type: Jar, 'hadoopJar') {
 	manifest.attributes('Main-Class': 'net.thevis.groovyhadoop.Main')
 	into ('lib') {
 		from configurations.groovy
