@@ -39,18 +39,52 @@ class MainTest extends GroovyTestCase {
 		}
 	}
 	
-	void testWordcount() {
-		Main.main((String[])[
-			'-D', 'mapred.output.key.class=org.apache.hadoop.io.Text', 
-			'-D', 'mapred.output.value.class=org.apache.hadoop.io.LongWritable', 
-			'-map', 'value.toString().tokenize().each { context.write(new Text(it), new LongWritable(1)) }',
-			'-reduce', 'def sum = 0; values.each { sum += it.get() }; context.write(key, new LongWritable(sum))', 
-			'-input', './LICENSE-2.0', '-output', this.testOutput.path])
+	void testWordcount_groovy() {
+		def map = 'value.toString().tokenize().each { context.write(new Text(it), new LongWritable(1)) }'
+		def reduce = 'def sum = 0; values.each { sum += it.get() }; context.write(key, new LongWritable(sum))'
+		def input = './LICENSE-2.0'
 		
-		def result = new File(this.testOutput, "part-r-00000").text
+		def result = executeMain(map, reduce, input)
 		
 		def expectedResult = getClass().getClassLoader()
 			.getResourceAsStream('wordcount.result').text
 		assert result == expectedResult
+	}
+
+	void testWordcount_java() {
+		def map = '''
+			Scanner scanner = new Scanner(value.toString()); 
+			while (scanner.hasNext()) { 
+				context.write(new Text(scanner.next()), new LongWritable(1)); 
+			}
+		'''
+		def reduce = '''
+			int sum = 0; 
+			for (LongWritable value : values) {
+				sum += value.get();
+			}
+			context.write(key, new LongWritable(sum));
+		'''
+		def input = './LICENSE-2.0'
+		
+		def result = executeMain(map, reduce, input)
+		
+		def expectedResult = getClass().getClassLoader()
+			.getResourceAsStream('wordcount.result').text
+		assert result == expectedResult
+	}
+
+	
+		
+	def executeMain = { map, reduce, inputPath ->
+		Main.main((String[])[
+			'-D', 'mapred.output.key.class=org.apache.hadoop.io.Text',
+			'-D', 'mapred.output.value.class=org.apache.hadoop.io.LongWritable',
+			'-map', map,
+			'-reduce', reduce,
+			'-input', inputPath, 
+			'-output', this.testOutput.path])
+		
+		return new File(this.testOutput, "part-r-00000").text
 	}
 }

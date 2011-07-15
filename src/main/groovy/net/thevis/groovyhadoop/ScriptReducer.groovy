@@ -20,15 +20,16 @@ import groovy.lang.Script;
 
 import java.io.IOException;
 
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Mapper.Context;
+import org.apache.hadoop.mapreduce.Reducer.Context;
 
 /**
  * @author Thomas Thevis
  *
  */
-class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
-		extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
+class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
 	static final String CONF_REDUCE_SCRIPT = 'groovyhadoop.reduce.script'
 
@@ -43,8 +44,8 @@ class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 	
 	@Override
 	protected void reduce(KEY_IN key, Iterable<VALUE_IN> values, Context context) 
-		throws IOException, InterruptedException {
-			
+			throws IOException, InterruptedException {		
+		
 		script.binding.key = key
 		script.binding.values = values
 		script.binding.context = context
