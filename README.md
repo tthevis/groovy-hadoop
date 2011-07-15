@@ -27,8 +27,15 @@ this project.
 ## User Guide
 
 *groovy-hadoop* is a command line tool. It integrates seamlessly with the `hadoop jar` application. Hadoop properties are transparently
-delegated to underlying framework with only some minor exceptions.
-Users can specify their `map()` and `reduce()` code inline at the command prompt.
+delegated to the underlying framework with only some minor exceptions.
+Users can specify their `map()` and `reduce()` code inline right at the command prompt.
+
+### Requirements
+
+The only requirement is a working Hadoop installation. The application was tested with:
+
+- Hadoop-0.20.2 (vanilla Hadoop from Apache)
+- Hadoop-0.20.2-cdh3u1-SNAPSHOT (from Cloudera)
 
 ### Example: The Ubiquitous Wordcount
 [Wordcount](http://wiki.apache.org/hadoop/WordCount) with *groovy-hadoop* is executed as
@@ -71,29 +78,91 @@ and read it during execution from a subshell:
 
 ### Magic Parameters and Magic Imports
 
-Map and reduce scripts must contain of syntactically correct Groovy or Java code. Classes which are
+Map and reduce scripts must contain syntactically correct Groovy or Java code. Classes which are
 not automatically imported have to be fully qualified or have to be imported as in every other Java/Groovy application.
 
 The following parameters are injected and accessible within the `map` code:
 
-- key : The input key type as provided by the Inputformat
-- value : The input value type as provided by the Inputformat
-- context : `org.apache.hadoop.mapreduce.Mapper.Context`
-- log : `java.util.logging.Logger` 
+- `key` : The input key type as provided by the Inputformat
+- `value` : The input value type as provided by the Inputformat
+- `context` : `org.apache.hadoop.mapreduce.Mapper.Context`
+- `log` : `java.util.logging.Logger` 
 
 The following parameters are injected and accessible within the `reduce` code:
 
-- key : The input key type as specified by `mapred.output.key.class` or `mapred.mapoutput.key.class`
-- values : `java.lang.Iterable` of the generic type specified by `mapred.output.value.class` or `mapred.mapoutput.value.class`
-- context : `org.apache.hadoop.mapreduce.Reducer.Context`
-- log : `java.util.logging.Logger` 
+- `key` : The input key type as specified by `mapred.output.key.class` or `mapred.mapoutput.key.class`
+- `values` : `java.lang.Iterable` of the generic type specified by `mapred.output.value.class` or `mapred.mapoutput.value.class`
+- `context` : `org.apache.hadoop.mapreduce.Reducer.Context`
+- `log` : `java.util.logging.Logger` 
 
 Additionally, some classes are already imported for convenience. In addition to the 
 [Groovy default imports](http://groovy.codehaus.org/Differences+from+Java), all the `Writable`s from
 `org.apache.hadoop.io` are accessible and do not need to be fully qualified.
 
+### Command Line Interface		    	
+	
+    $ hadoop jar groovy-hadoop-0.1.0.jar -h
+    usage: Main [-map <map script>] [-reduce <reduce script>] [-input <input
+                paths>] [-output <output path>]
+     -h,--help                 Show usage information
+     -input <input paths>      Convenience parameter. Sets the
+                               'mapred.input.dir' property.
+     -map <map script>         Executes the script in the map phase. Available
+                               parameters: key, value, context
+     -output <output paths>    Convenience parameter. Sets the
+                               'mapred.output.dir' property. The corresponding
+                               path should usually not exist.
+     -reduce <reduce script>   Executes the script in the reduce phase.
+                               Available parameters: key, values, context
+
 ### Combining groovy-hadoop with Custom Libraries
 
+Suppose there is custom `Writable` implementation like
+
+    package my.fancy;
+
+    import java.io.DataInput;
+    import java.io.DataOutput;
+    import java.io.IOException;
+
+    import org.apache.hadoop.io.Text;
+    import org.apache.hadoop.io.Writable;
+
+    public class CustomWritable implements Writable {
+
+        private String value;
+	
+        public CustomWritable(String value) {
+            this.value = value;
+        }
+	
+    	@Override
+    	public String toString() {
+    		return this.value;
+    	}
+	
+    	@Override
+    	public void readFields(DataInput in) throws IOException {
+    		this.value = Text.readString(in);
+    	}
+
+    	@Override
+    	public void write(DataOutput out) throws IOException {
+    		Text.writeString(out, this.value);
+    	}
+    }
+
+Furthermore suppose that this `CustomWritable` is properly bundled within a JAR file called `my-writable`.
+Then it is possible to access and use this class with a call like 
+
+    $ hadoop jar groovy-hadoop-0.1.0.jar                                     \
+    -libjars my-writable.jar                                                 \
+    -D mapred.output.key.class=my.fancy.CustomWritable                       \
+    -D mapred.output.value.class=org.apache.hadoop.io.LongWritable           \
+    -D mapred.reduce.tasks=0                                                 \
+    -map 'context.write(new my.fancy.CustomWritable(value.toString()), key)' \
+    -input <input path(s) in HDFS>                                           \
+    -output <output path in HDFS>                                            \       		    	
 		    	
 ## Developer Guide
 
