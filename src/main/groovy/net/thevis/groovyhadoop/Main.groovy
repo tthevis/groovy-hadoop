@@ -16,20 +16,18 @@
 
 package net.thevis.groovyhadoop
 
-import java.awt.JobAttributes;
-import java.util.concurrent.ConcurrentSkipListMap.Index;
-
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.conf.Configured
+import org.apache.hadoop.mapreduce.Job
+import org.apache.hadoop.util.Tool
+import org.apache.hadoop.util.ToolRunner
 
 /**
+ * The application's entry point.
+ * 
  * @author Thomas Thevis
- *
+ * @since 0.1.0
  */
 class Main extends Configured implements Tool {
-
 	
 	int run(String[] args) {
 		def cli = new CliBuilder(usage: 'Main [-map <map script>] [-reduce <reduce script>] [-input <input paths>] [-output <output path>]')

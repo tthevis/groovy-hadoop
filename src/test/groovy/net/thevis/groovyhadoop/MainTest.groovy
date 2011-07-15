@@ -16,14 +16,14 @@
 
 package net.thevis.groovyhadoop;
 
-import static org.junit.Assert.*;
-
-import org.junit.After;
-import org.junit.Before;
+import static org.junit.Assert.*
 
 /**
+ * Performs blackbox tests with a local Jobtracker in the local 
+ * filesystem.
+ * 
  * @author Thomas Thevis
- *
+ * @since 0.1.0
  */
 class MainTest extends GroovyTestCase {
 
@@ -73,8 +73,6 @@ class MainTest extends GroovyTestCase {
 			.getResourceAsStream('wordcount.result').text
 		assert result == expectedResult
 	}
-
-	
 		
 	def executeMain = { map, reduce, inputPath ->
 		Main.main((String[])[

@@ -16,20 +16,22 @@
 
 package net.thevis.groovyhadoop;
 
-import groovy.lang.Script;
+import groovy.lang.Script
 
-import java.io.IOException;
+import java.io.IOException
 
-import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
+import org.apache.hadoop.mapreduce.Reducer
+import org.apache.hadoop.mapreduce.Reducer.Context
 
 /**
+ * Reads reduce text from configuration and parses and prepares script once
+ * during {@link #setup(Context)}.  
+ * 
  * @author Thomas Thevis
- *
+ * @since 0.1.0
  */
-class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
+class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
+		extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
 	static final String CONF_REDUCE_SCRIPT = 'groovyhadoop.reduce.script'
 

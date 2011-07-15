@@ -16,25 +16,29 @@
 
 package net.thevis.groovyhadoop
 
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.BooleanWritable;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.ObjectWritable;
-import org.apache.hadoop.io.Text;
+import groovy.util.logging.Log
+
+import org.apache.hadoop.io.ArrayWritable
+import org.apache.hadoop.io.BooleanWritable
+import org.apache.hadoop.io.BytesWritable
+import org.apache.hadoop.io.DoubleWritable
+import org.apache.hadoop.io.FloatWritable
+import org.apache.hadoop.io.IntWritable
+import org.apache.hadoop.io.LongWritable
+import org.apache.hadoop.io.MapWritable
+import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.io.ObjectWritable
+import org.apache.hadoop.io.Text
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 import org.codehaus.groovy.control.customizers.ImportCustomizer
-import groovy.util.logging.Log
+
 
 /**
+ * Parses and prepares scripts. Injects Hadoop defaults imports and a logger.
+ * 
  * @author Thomas Thevis
- *
+ * @since 0.1.0
  */
 class ScriptProvider {
 

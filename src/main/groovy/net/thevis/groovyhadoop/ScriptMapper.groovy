@@ -16,16 +16,18 @@
 
 package net.thevis.groovyhadoop
 
-
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Mapper.Context;
-
+import org.apache.hadoop.mapreduce.Mapper
+import org.apache.hadoop.mapreduce.Mapper.Context
 
 /**
+ * Reads map text from configuration and parses and prepares script once
+ * during {@link #setup(Context)}.  
+ * 
  * @author Thomas Thevis
- *
+ * @since 0.1.0
  */
-class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> extends Mapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
+class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
+		extends Mapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
 	static final String CONF_MAP_SCRIPT = 'groovyhadoop.map.script'
 	
@@ -39,7 +41,9 @@ class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> extends Mapper<KEY_IN, 
 	}
 	
 	@Override
-	protected void map(KEY_IN key, VALUE_IN value, Context context) throws IOException, InterruptedException {
+	protected void map(KEY_IN key, VALUE_IN value, Context context) 
+			throws IOException, InterruptedException {
+		
 		script.binding.key = key
 		script.binding.value = value
 		script.binding.context = context
