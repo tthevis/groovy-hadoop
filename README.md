@@ -8,11 +8,12 @@ executable JAR files.
 Target audience:
 
 * People who like to think and to code in terms of map/reduce but are a little annoyed 
-by the need of setting up Java projects and creating executable Hadoop `*.jar` files 
+by the need of setting up Java projects and creating executable Hadoop JAR files 
 for even the most basic map/reduce applications
 * People who would like to combine *hadoop-streaming* with Groovy but do not have the possibility 
 to install Groovy on the Hadoop cluster nodes
 * People who would like to run *ad-hoc* processing jobs and want to use their custom `Writable` implementations via the Java/Groovy API   
+* People wanting to prototype map/reduce applications before developing *proper* Java projects
 
 Who will not benefit from using *groovy-hadoop*? 
 
@@ -152,8 +153,8 @@ Suppose there is custom `Writable` implementation like
     	}
     }
 
-Furthermore suppose that this `CustomWritable` is properly bundled within a JAR file called `my-writable`.
-Then it is possible to access and use this class with a call like 
+Furthermore, suppose that this `CustomWritable` is properly bundled within a JAR file called `my-writable.jar`.
+Then it is possible to access and use this class from the map and reduce scripts with a call like 
 
     $ hadoop jar groovy-hadoop-0.1.0.jar                                     \
     -libjars my-writable.jar                                                 \
@@ -164,6 +165,17 @@ Then it is possible to access and use this class with a call like
     -input <input path(s) in HDFS>                                           \
     -output <output path in HDFS>                                            \       		    	
 		    	
+### Performance
+
+- Short version:
+#First make it work, then make it fast!#
+Performance will be targeted with release 0.2.0.
+- Longer version:
+Although the primary target of this project is not delivering incredible performance 
+writing *ad-hoc* map/reduce applications is more fun if the jobs run as fast 
+as possible. In first (unorganized) benchmarks *groovy-hadoop* jobs took about 
+10 to 20 percent longer than analogous *hadoop-streaming* jobs.   		    	
+		    			    	
 ## Developer Guide
 
 ### Build the Project
@@ -177,7 +189,8 @@ To create an executable JAR file in the `build/libs` folder type
 
     $ gradle build
     
-'nuff said.
+The resulting JAR file will be executable and contains the necessary Groovy libraries in a `lib` folder
+in its root directory.
         
 ## License
 
