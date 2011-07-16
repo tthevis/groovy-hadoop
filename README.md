@@ -168,7 +168,7 @@ Then it is possible to access and use this class from the map and reduce scripts
 ### Performance
 
 - Short version:
-#First make it work, then make it fast!#
+*First make it work, then make it fast!*
 Performance will be targeted with release 0.2.0.
 - Longer version:
 Although the primary target of this project is not delivering incredible performance 
