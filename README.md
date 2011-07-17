@@ -72,8 +72,8 @@ and read it during execution from a subshell:
     $ hadoop jar groovy-hadoop-0.1.0.jar                            \
     -D mapred.output.key.class=org.apache.hadoop.io.Text            \
     -D mapred.output.value.class=org.apache.hadoop.io.LongWritable  \
-    -map `cat map.txt`                                              \
-    -reduce `reduce.txt`                                            \
+    -map "`cat map.txt`"                                            \
+    -reduce "`cat reduce.txt`"                                      \
     -input <input path(s) in HDFS>                                  \
     -output <output path in HDFS>                                   \
 
