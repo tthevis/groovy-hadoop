@@ -16,8 +16,11 @@
 
 package net.thevis.groovyhadoop
 
+import groovy.util.logging.Log
+
 import org.apache.hadoop.mapreduce.Mapper
 import org.apache.hadoop.mapreduce.Mapper.Context
+import org.apache.hadoop.util.ReflectionUtils
 
 /**
  * Reads map text from configuration and parses and prepares script once
@@ -26,6 +29,7 @@ import org.apache.hadoop.mapreduce.Mapper.Context
  * @author Thomas Thevis
  * @since 0.1.0
  */
+@Log
 class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
 		extends Mapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
@@ -33,21 +37,36 @@ class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 	
 	private Script script
 	
+	def lastInstances = [:]
+		
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
 		def scriptText = context.getConfiguration().get(CONF_MAP_SCRIPT)
 		def scriptProvider = new ScriptProvider()
 		this.script = scriptProvider.getParsedScript(scriptText)
+		
+		this.script.binding.outKey = ReflectionUtils.newInstance(
+				context.getMapOutputKeyClass(), context.getConfiguration())
+		this.script.binding.outValue = ReflectionUtils.newInstance(
+				context.getMapOutputValueClass(), context.getConfiguration())
 	}
 	
 	@Override
 	protected void map(KEY_IN key, VALUE_IN value, Context context) 
 			throws IOException, InterruptedException {
 		
-		script.binding.key = key
-		script.binding.value = value
-		script.binding.context = context
+		updateIfNewInstance key, "key"		
+		updateIfNewInstance value, "value"
+		updateIfNewInstance context, "context"
 		
-		script.run()		
+		this.script.run()		
 	}
+			
+	def updateIfNewInstance = { variable, name ->
+		if (!variable.is(this.lastInstances[name])) {
+			this.script.binding[name] = variable
+			this.lastInstances[name] = variable
+			log.info "reset instance for ${name}"
+		}
+	}		
 }

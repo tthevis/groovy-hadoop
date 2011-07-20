@@ -51,6 +51,19 @@ class MainTest extends GroovyTestCase {
 		assert result == expectedResult
 	}
 
+	void testWordcount_groovy_withOutKeyAndOutValue() {
+		def map = 'outValue.set(1); value.toString().tokenize().each { outKey.set(it); context.write(outKey, outValue) }'
+		def reduce = 'def sum = 0; values.each { sum += it.get() }; outValue.set(sum); context.write(key, outValue)'
+		def input = './LICENSE-2.0'
+		
+		def result = executeMain(map, reduce, input)
+		
+		def expectedResult = getClass().getClassLoader()
+			.getResourceAsStream('wordcount.result').text
+		assert result == expectedResult
+	}
+
+	
 	void testWordcount_java() {
 		def map = '''
 			Scanner scanner = new Scanner(value.toString()); 

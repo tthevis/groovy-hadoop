@@ -17,11 +17,13 @@
 package net.thevis.groovyhadoop;
 
 import groovy.lang.Script
+import groovy.util.logging.Log;
 
 import java.io.IOException
 
 import org.apache.hadoop.mapreduce.Reducer
 import org.apache.hadoop.mapreduce.Reducer.Context
+import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * Reads reduce text from configuration and parses and prepares script once
@@ -30,6 +32,7 @@ import org.apache.hadoop.mapreduce.Reducer.Context
  * @author Thomas Thevis
  * @since 0.1.0
  */
+@Log
 class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
 		extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
@@ -37,21 +40,36 @@ class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 
 	private Script script
 
+	def lastInstances = [:]
+	
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
 		def scriptText = context.getConfiguration().get(CONF_REDUCE_SCRIPT)
 		def scriptProvider = new ScriptProvider()
 		this.script = scriptProvider.getParsedScript(scriptText)
+
+		this.script.binding.outKey = ReflectionUtils.newInstance(
+				context.getOutputKeyClass(), context.getConfiguration())
+		this.script.binding.outValue = ReflectionUtils.newInstance(
+				context.getOutputValueClass(), context.getConfiguration())
 	}
 	
 	@Override
 	protected void reduce(KEY_IN key, Iterable<VALUE_IN> values, Context context) 
 			throws IOException, InterruptedException {		
 		
-		script.binding.key = key
-		script.binding.values = values
-		script.binding.context = context
-			
-		script.run()
+		updateIfNewInstance key, "key"		
+		updateIfNewInstance values, "values"
+		updateIfNewInstance context, "context"
+		
+		this.script.run()		
 	}
+			
+	def updateIfNewInstance = { variable, name ->
+		if (!variable.is(this.lastInstances[name])) {
+			this.script.binding[name] = variable
+			this.lastInstances[name] = variable
+			log.info "reset instance for ${name}"
+		}
+	}		
 }
