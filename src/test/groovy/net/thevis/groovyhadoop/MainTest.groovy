@@ -94,7 +94,8 @@ class MainTest extends GroovyTestCase {
 			'-map', map,
 			'-reduce', reduce,
 			'-input', inputPath, 
-			'-output', this.testOutput.path])
+			'-output', this.testOutput.path,
+			'--quiet'])
 		
 		return new File(this.testOutput, "part-r-00000").text
 	}
