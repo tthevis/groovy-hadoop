@@ -16,14 +16,9 @@
 
 package net.thevis.groovyhadoop;
 
-import groovy.lang.Script
-import groovy.util.logging.Log;
-
-import java.io.IOException
-
 import org.apache.hadoop.mapreduce.Reducer
 import org.apache.hadoop.mapreduce.Reducer.Context
-import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.util.ReflectionUtils
 
 /**
  * Reads reduce text from configuration and parses and prepares script once
@@ -32,7 +27,6 @@ import org.apache.hadoop.util.ReflectionUtils;
  * @author Thomas Thevis
  * @since 0.1.0
  */
-@Log
 class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
 		extends Reducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
@@ -40,11 +34,13 @@ class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 
 	private Script script
 
-	def lastInstances = [:]
-	
+	private KEY_IN lastKey
+	private Iterable<VALUE_IN> lastValues
+	private Context lastContext
+
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
-		def scriptText = context.getConfiguration().get(CONF_REDUCE_SCRIPT)
+		def scriptText = context.getConfiguration().get(getScriptConfigKey())
 		def scriptProvider = new ScriptProvider()
 		this.script = scriptProvider.getParsedScript(scriptText)
 
@@ -53,23 +49,28 @@ class ScriptReducer<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 		this.script.binding.outValue = ReflectionUtils.newInstance(
 				context.getOutputValueClass(), context.getConfiguration())
 	}
-	
+
+	protected String getScriptConfigKey() {
+		return CONF_REDUCE_SCRIPT;
+	}
+		
 	@Override
 	protected void reduce(KEY_IN key, Iterable<VALUE_IN> values, Context context) 
 			throws IOException, InterruptedException {		
 		
-		updateIfNewInstance key, "key"		
-		updateIfNewInstance values, "values"
-		updateIfNewInstance context, "context"
+		if (!key.is(lastKey)) {
+			script.binding.key = key;
+			lastKey = key
+		}		
+		if (!values.is(lastValues)) {
+			script.binding.values = values;
+			lastValues = values
+		}		
+		if (!context.is(lastContext)) {
+			script.binding.context = context;
+			lastContext = context
+		}		
 		
 		this.script.run()		
 	}
-			
-	def updateIfNewInstance = { variable, name ->
-		if (!variable.is(this.lastInstances[name])) {
-			this.script.binding[name] = variable
-			this.lastInstances[name] = variable
-			log.info "reset instance for ${name}"
-		}
-	}		
 }

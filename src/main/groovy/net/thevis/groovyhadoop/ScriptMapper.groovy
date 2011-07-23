@@ -16,7 +16,6 @@
 
 package net.thevis.groovyhadoop
 
-import groovy.util.logging.Log
 
 import org.apache.hadoop.mapreduce.Mapper
 import org.apache.hadoop.mapreduce.Mapper.Context
@@ -29,25 +28,26 @@ import org.apache.hadoop.util.ReflectionUtils
  * @author Thomas Thevis
  * @since 0.1.0
  */
-@Log
 class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> 
 		extends Mapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT> {
 
 	static final String CONF_MAP_SCRIPT = 'groovyhadoop.map.script'
 	
 	private Script script
+
+	private KEY_IN lastKey
+	private VALUE_IN lastValue
+	private Context lastContext
 	
-	def lastInstances = [:]
-		
 	@Override
 	protected void setup(Context context) throws IOException, InterruptedException {
 		def scriptText = context.getConfiguration().get(CONF_MAP_SCRIPT)
 		def scriptProvider = new ScriptProvider()
-		this.script = scriptProvider.getParsedScript(scriptText)
+		script = scriptProvider.getParsedScript(scriptText)
 		
-		this.script.binding.outKey = ReflectionUtils.newInstance(
+		script.binding.outKey = ReflectionUtils.newInstance(
 				context.getMapOutputKeyClass(), context.getConfiguration())
-		this.script.binding.outValue = ReflectionUtils.newInstance(
+		script.binding.outValue = ReflectionUtils.newInstance(
 				context.getMapOutputValueClass(), context.getConfiguration())
 	}
 	
@@ -55,18 +55,18 @@ class ScriptMapper<KEY_IN, VALUE_IN, KEY_OUT, VALUE_OUT>
 	protected void map(KEY_IN key, VALUE_IN value, Context context) 
 			throws IOException, InterruptedException {
 		
-		updateIfNewInstance key, "key"		
-		updateIfNewInstance value, "value"
-		updateIfNewInstance context, "context"
-		
-		this.script.run()		
+		if (!key.is(lastKey)) {
+			script.binding.key = key;
+			lastKey = key
+		}		
+		if (!value.is(lastValue)) {
+			script.binding.value = value;
+			lastValue = value
+		}		
+		if (!context.is(lastContext)) {
+			script.binding.context = context;
+			lastContext = context
+		}		
+		script.run()		
 	}
-			
-	def updateIfNewInstance = { variable, name ->
-		if (!variable.is(this.lastInstances[name])) {
-			this.script.binding[name] = variable
-			this.lastInstances[name] = variable
-			log.info "reset instance for ${name}"
-		}
-	}		
 }
