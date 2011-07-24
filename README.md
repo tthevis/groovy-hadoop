@@ -29,7 +29,8 @@ this project.
 
 *groovy-hadoop* is a command line tool. It integrates seamlessly with the `hadoop jar` application. Hadoop properties are transparently
 delegated to the underlying framework with only some minor exceptions.
-Users can specify their `map()` and `reduce()` code inline right at the command prompt.
+Users can specify their `map()` and `reduce()` code inline right at the command prompt. Since version 0.2.0 it
+is also possible to specify `combine` code.
 
 ### Requirements
 
@@ -88,13 +89,17 @@ The following parameters are injected and accessible within the `map` code:
 - `value` : The input value type as provided by the Inputformat
 - `context` : `org.apache.hadoop.mapreduce.Mapper.Context`
 - `log` : `java.util.logging.Logger` 
+- `outKey` : a single output key instance which will be reused 
+- `outValue` : a single output value instance which will be reused 
 
-The following parameters are injected and accessible within the `reduce` code:
+The following parameters are injected and accessible within the `reduce` and `combine` code:
 
 - `key` : The input key type as specified by `mapred.output.key.class` or `mapred.mapoutput.key.class`
 - `values` : `java.lang.Iterable` of the generic type specified by `mapred.output.value.class` or `mapred.mapoutput.value.class`
 - `context` : `org.apache.hadoop.mapreduce.Reducer.Context`
 - `log` : `java.util.logging.Logger` 
+- `outKey` : a single output key instance which will be reused 
+- `outValue` : a single output value instance which will be reused 
 
 Additionally, some classes are already imported for convenience. In addition to the 
 [Groovy default imports](http://groovy.codehaus.org/Differences+from+Java), all the `Writable`s from
@@ -102,19 +107,52 @@ Additionally, some classes are already imported for convenience. In addition to 
 
 ### Command Line Interface		    	
 	
-    $ hadoop jar groovy-hadoop-0.1.0.jar -h
-    usage: Main [-map <map script>] [-reduce <reduce script>] [-input <input
-                paths>] [-output <output path>]
-     -h,--help                 Show usage information
-     -input <input paths>      Convenience parameter. Sets the
-                               'mapred.input.dir' property.
-     -map <map script>         Executes the script in the map phase. Available
-                               parameters: key, value, context
-     -output <output paths>    Convenience parameter. Sets the
-                               'mapred.output.dir' property. The corresponding
-                               path should usually not exist.
-     -reduce <reduce script>   Executes the script in the reduce phase.
-                               Available parameters: key, values, context
+    usage: $ hadoop jar groovy-hadoop-VERSION.jar [generic hadoop options]
+             [groovy-hadoop options]
+    Note: groovy-hadoop options override generic hadoop options.
+     -archives <paths>                 Generic hadoop option. Comma separated
+                                       archives to be unarchived on the
+                                       compute machines.
+     -combine <combine script>         Executes the script in the combine
+                                       phase. Available parameters: key,
+                                       values, context, outKey, outValue
+     -combinesplits <max split size>   Sets maximum split size for
+                                       InputFormats extending FileInputFormat.
+                                       Use "0" to prevent the applicaton from
+                                       using combine splits. Example values:
+                                       "128M", "1G", "134217728". Default is
+                                       "512M".
+     -conf <configuration file>        Generic hadoop option. Specify an
+                                       application configuration file.
+     -D <property=value>               Generic hadoop option. Set arbitrary
+                                       property value.
+     -files <paths>                    Generic hadoop option. Comma separated
+                                       files to be copied to the map reduce
+                                       cluster.
+     -fs <local|namenode:port>         Generic hadoop option. Sets
+                                       "fs.default.name" property.
+     -help                             Show usage information
+     -input <input paths>              Convenience parameter. Sets the
+                                       "mapred.input.dir" property.
+     -jt <local|jobtracker:port>       Generic hadoop option. Sets
+                                       "mapred.job.tracker" property.
+     -jvmreuse <reuse value>           Sets "mapred.job.reuse.jvm.num.tasks"
+                                       property. Default value is "-1" meaning
+                                       "use JVM instances as often as
+                                       possible".
+     -libjars <paths>                  Generic hadoop option. Comma separated
+                                       jar files to include in the classpath.
+     -map <map script>                 Executes the script in the map phase.
+                                       Available parameters: key, value,
+                                       context, outKey, outValue
+     -output <output paths>            Convenience parameter. Sets the
+                                       "mapred.output.dir" property. The
+                                       corresponding path should usually not
+                                       exist.
+     -quiet                            Do not use verbose output.
+     -reduce <reduce script>           Executes the script in the reduce
+                                       phase. Available parameters: key,
+                                       values, context, outKey, outValue
 
 ### Combining groovy-hadoop with Custom Libraries
 
