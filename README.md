@@ -18,7 +18,7 @@ to install Groovy on the Hadoop cluster nodes
 Who will not benefit from using *groovy-hadoop*? 
 
 * Performance hunters. After all, it is Groovy, it is dynamic, it is not completely pre-compiled. 
-The means to re-use output keys and values are limited and so on...
+At least, it seems to be faster than *hadoop-streaming* (see below).
 * People striving for *yet another abstraction layer* (TM) on top of map/reduce. 
 Please consider using [Pig](http://pig.apache.org/) or [Hive](http://hive.apache.org/) or something similar this case.
 * Scripting Gurus. If you know how to write your custom queries using your scripting language of choice in concert with
@@ -205,14 +205,12 @@ Then it is possible to access and use this class from the map and reduce scripts
 		    	
 ### Performance
 
-- Short version:
-*First make it work, then make it fast!*
-Performance will be targeted with release 0.2.0.
-- Longer version:
-Although the primary target of this project is not delivering incredible performance 
-writing *ad-hoc* map/reduce applications is more fun if the jobs run as fast 
-as possible. In first (unorganized) benchmarks *groovy-hadoop* jobs took about 
-10 to 20 percent longer than analogous *hadoop-streaming* jobs.   		    	
+Although the primary target of this project is not delivering incredible performance, 
+writing *ad-hoc* map/reduce applications is more definitely fun if the jobs run as fast 
+as possible. In first (unorganized) benchmarks *groovy-hadoop-0.1.0* jobs took about 
+10 to 20 percent longer than analogous *hadoop-streaming* jobs. Current *groovy-hadoop-0.2.0-SNAPSHOT* 
+jobs are significant faster than analogous streaming jobs.
+	    	
 		    			    	
 ## Developer Guide
 
