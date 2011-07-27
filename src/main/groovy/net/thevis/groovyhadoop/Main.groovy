@@ -47,7 +47,11 @@ class Main extends Configured implements Tool {
 		cli.jvmreuse args: 1, argName: 'reuse value', 'Sets "mapred.job.reuse.jvm.num.tasks" property. Default value is "-1" meaning "use JVM instances as often as possible".'	
 		cli.combinesplits args: 1, argName: 'max split size', 'Sets maximum split size for InputFormats extending FileInputFormat. Use "0" to prevent the applicaton from using combine splits. Example values: "128M", "1G", "134217728". Default is "512M".'
 		cli.combine args: 1, argName: 'combine script', 'Executes the script in the combine phase. Available parameters: key, values, context, outKey, outValue'
-				
+		cli.mapOutputKeyClass args: 1, argName: 'class name', 'Convenience parameter for "mapred.mapoutput.key.class" property. All hadoop writables can be specified via their simple class name, like "Text" for example.'
+		cli.mapOutputValueClass args: 1, argName: 'class name', 'Convenience parameter for "mapred.mapoutput.value.class" property. All hadoop writables can be specified via their simple class name, like "Text" for example.'
+		cli.outputKeyClass args: 1, argName: 'class name', 'Convenience parameter for "mapred.output.key.class" property. All hadoop writables can be specified via their simple class name, like "Text" for example.'
+		cli.outputValueClass args: 1, argName: 'class name', 'Convenience parameter for "mapred.output.value.class" property. All hadoop writables can be specified via their simple class name, like "Text" for example.'
+		
 		/* generic hadoop options as specified by GenericOptionsParser */
 		cli.fs args: 1, argName: 'local|namenode:port', 'Generic hadoop option. Sets "fs.default.name" property.'
 		cli.jt args: 1, argName: 'local|jobtracker:port', 'Generic hadoop option. Sets "mapred.job.tracker" property.'
@@ -99,6 +103,15 @@ class Main extends Configured implements Tool {
 				job.getConfiguration().setLong("mapreduce.input.fileinputformat.split.maxsize", splitSize)
 			}
 		}
+		['mapOutputKeyClass' : 'mapred.mapoutput.key.class', 
+			'mapOutputValueClass' : 'mapred.mapoutput.value.class',
+				'outputKeyClass' : 'mapred.output.key.class', 
+					'outputValueClass' : 'mapred.output.value.class'].each {  
+			if (options[it.key]) {
+				job.getConfiguration().set(it.value, resolveClassName(options[it.key]))
+			}	
+		}
+		
 		def success = job.waitForCompletion(!options.quiet);		
 		return success ? 0 : 1
 	}
@@ -114,6 +127,19 @@ class Main extends Configured implements Tool {
 		}
 		return matcher[0][2] in ['M', 'm'] ? base * 1024 * 1024 : base * 1024 * 1024 * 1024
 	} 
+	
+	
+	def resolveClassName = {
+		if (it.indexOf(".") == -1) {
+			try {
+				return Class.forName("org.apache.hadoop.io.${it}", false, 
+					getClass().getClassLoader()).name
+			} catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException("invalid class name ${it}}")
+			}
+		} 
+		return it	
+	}
 	
 	static main(String[] args) {
 		ToolRunner.run(new Main(), args)		

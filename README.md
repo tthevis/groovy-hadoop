@@ -43,8 +43,8 @@ The only requirement is a working Hadoop installation. The application was teste
 [Wordcount](http://wiki.apache.org/hadoop/WordCount) with *groovy-hadoop* is executed as
 
 	$ hadoop jar groovy-hadoop-0.1.0.jar                                                              \
-	-D mapred.output.key.class=org.apache.hadoop.io.Text                                              \
-	-D mapred.output.value.class=org.apache.hadoop.io.LongWritable                                    \
+    -outputKeyClass Text                                                                              \
+    -outputValueClass LongWritable                                                                    \
 	-map 'value.toString().tokenize().each { context.write(new Text(it), new LongWritable(1)) }'      \
 	-reduce 'def sum = 0; values.each { sum += it.get() }; context.write(key, new LongWritable(sum))' \
 	-input <input path(s) in HDFS>                                                                    \
@@ -71,8 +71,8 @@ and read it during execution from a subshell:
 3) Execution
 
     $ hadoop jar groovy-hadoop-0.1.0.jar                            \
-    -D mapred.output.key.class=org.apache.hadoop.io.Text            \
-    -D mapred.output.value.class=org.apache.hadoop.io.LongWritable  \
+    -outputKeyClass Text                                            \
+    -outputValueClass LongWritable                                  \
     -map "`cat map.txt`"                                            \
     -reduce "`cat reduce.txt`"                                      \
     -input <input path(s) in HDFS>                                  \
@@ -110,49 +110,70 @@ Additionally, some classes are already imported for convenience. In addition to 
     usage: $ hadoop jar groovy-hadoop-VERSION.jar [generic hadoop options]
              [groovy-hadoop options]
     Note: groovy-hadoop options override generic hadoop options.
-     -archives <paths>                 Generic hadoop option. Comma separated
-                                       archives to be unarchived on the
-                                       compute machines.
-     -combine <combine script>         Executes the script in the combine
-                                       phase. Available parameters: key,
-                                       values, context, outKey, outValue
-     -combinesplits <max split size>   Sets maximum split size for
-                                       InputFormats extending FileInputFormat.
-                                       Use "0" to prevent the applicaton from
-                                       using combine splits. Example values:
-                                       "128M", "1G", "134217728". Default is
-                                       "512M".
-     -conf <configuration file>        Generic hadoop option. Specify an
-                                       application configuration file.
-     -D <property=value>               Generic hadoop option. Set arbitrary
-                                       property value.
-     -files <paths>                    Generic hadoop option. Comma separated
-                                       files to be copied to the map reduce
-                                       cluster.
-     -fs <local|namenode:port>         Generic hadoop option. Sets
-                                       "fs.default.name" property.
-     -help                             Show usage information
-     -input <input paths>              Convenience parameter. Sets the
-                                       "mapred.input.dir" property.
-     -jt <local|jobtracker:port>       Generic hadoop option. Sets
-                                       "mapred.job.tracker" property.
-     -jvmreuse <reuse value>           Sets "mapred.job.reuse.jvm.num.tasks"
-                                       property. Default value is "-1" meaning
-                                       "use JVM instances as often as
-                                       possible".
-     -libjars <paths>                  Generic hadoop option. Comma separated
-                                       jar files to include in the classpath.
-     -map <map script>                 Executes the script in the map phase.
-                                       Available parameters: key, value,
-                                       context, outKey, outValue
-     -output <output paths>            Convenience parameter. Sets the
-                                       "mapred.output.dir" property. The
-                                       corresponding path should usually not
-                                       exist.
-     -quiet                            Do not use verbose output.
-     -reduce <reduce script>           Executes the script in the reduce
-                                       phase. Available parameters: key,
-                                       values, context, outKey, outValue
+     -combine <combine script>           Executes the script in the combine
+                                         phase. Available parameters: key,
+                                         values, context, outKey, outValue
+     -combinesplits <max split size>     Sets maximum split size for
+                                         InputFormats extending
+                                         FileInputFormat. Use "0" to prevent
+                                         the applicaton from using combine
+                                         splits. Example values: "128M", "1G",
+                                         "134217728". Default is "512M".
+     -help                               Show usage information
+     -input <input paths>                Convenience parameter. Sets the
+                                         "mapred.input.dir" property.
+     -jvmreuse <reuse value>             Sets "mapred.job.reuse.jvm.num.tasks"
+                                         property. Default value is "-1"
+                                         meaning "use JVM instances as often
+                                         as possible".
+     -map <map script>                   Executes the script in the map phase.
+                                         Available parameters: key, value,
+                                         context, outKey, outValue
+     -mapOutputKeyClass <class name>     Convenience parameter for
+                                         "mapred.mapoutput.key.class"
+                                         property. All hadoop writables can be
+                                         specified via their simple class
+                                         name, like "Text" for example.
+     -mapOutputValueClass <class name>   Convenience parameter for
+                                         "mapred.mapoutput.value.class"
+                                         property. All hadoop writables can be
+                                         specified via their simple class
+                                         name, like "Text" for example.
+     -output <output paths>              Convenience parameter. Sets the
+                                         "mapred.output.dir" property. The
+                                         corresponding path should usually not
+                                         exist.
+     -outputKeyClass <class name>        Convenience parameter for
+                                         "mapred.output.key.class" property.
+                                         All hadoop writables can be specified
+                                         via their simple class name, like
+                                         "Text" for example.
+     -outputValueClass <class name>      Convenience parameter for
+                                         "mapred.output.value.class" property.
+                                         All hadoop writables can be specified
+                                         via their simple class name, like
+                                         "Text" for example.
+     -quiet                              Do not use verbose output.
+     -reduce <reduce script>             Executes the script in the reduce
+                                         phase. Available parameters: key,
+                                         values, context, outKey, outValue
+     -archives <paths>                   Generic hadoop option. Comma
+                                         separated archives to be unarchived
+                                         on the compute machines.
+     -conf <configuration file>          Generic hadoop option. Specify an
+                                         application configuration file.
+     -D <property=value>                 Generic hadoop option. Set arbitrary
+                                         property value.
+     -files <paths>                      Generic hadoop option. Comma
+                                         separated files to be copied to the
+                                         map reduce cluster.
+     -fs <local|namenode:port>           Generic hadoop option. Sets
+                                         "fs.default.name" property.
+     -jt <local|jobtracker:port>         Generic hadoop option. Sets
+                                         "mapred.job.tracker" property.
+     -libjars <paths>                    Generic hadoop option. Comma
+                                         separated jar files to include in the
+                                         classpath.
 
 ### Combining groovy-hadoop with Custom Libraries
 

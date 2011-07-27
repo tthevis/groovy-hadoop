@@ -89,8 +89,8 @@ class MainTest extends GroovyTestCase {
 		
 	def executeMain = { map, reduce, inputPath ->
 		Main.main((String[])[
-			'-D', 'mapred.output.key.class=org.apache.hadoop.io.Text',
-			'-D', 'mapred.output.value.class=org.apache.hadoop.io.LongWritable',
+			'-outputKeyClass', 'Text',
+			'-outputValueClass', 'LongWritable',
 			'-map', map,
 			'-reduce', reduce,
 			'-input', inputPath, 
