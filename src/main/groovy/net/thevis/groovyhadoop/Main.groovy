@@ -16,14 +16,12 @@
 
 package net.thevis.groovyhadoop
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.text.MaskFormatter.LiteralCharacter;
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 import org.apache.hadoop.conf.Configured
 import org.apache.hadoop.mapreduce.Job
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat
 import org.apache.hadoop.util.Tool
 import org.apache.hadoop.util.ToolRunner
 
@@ -58,6 +56,8 @@ class Main extends Configured implements Tool {
 		cli.libjars args: 1, argName: 'paths', 'Generic hadoop option. Comma separated jar files to include in the classpath.'
 		cli.files args: 1 , argName: 'paths', 'Generic hadoop option. Comma separated files to be copied to the map reduce cluster.'
 		cli.archives args: 1, argName: 'paths', 'Generic hadoop option. Comma separated archives to be unarchived on the compute machines.'
+		
+		cli.formatter.setOptionComparator(new OptionsComparator())
 	}
 	
 	int run(String[] args) {
@@ -118,4 +118,21 @@ class Main extends Configured implements Tool {
 	static main(String[] args) {
 		ToolRunner.run(new Main(), args)		
 	}
+	
+	/* generic hadoop options should be sorted last in usage() message */
+	private static class OptionsComparator implements Comparator {
+		
+		int compare(opt1, opt2) {
+			if (opt1.description.startsWith('Generic hadoop option.') 
+				&& !opt2.description.startsWith('Generic hadoop option.')) {
+				return 1;
+			}
+			if (!opt1.description.startsWith('Generic hadoop option.') 
+				&& opt2.description.startsWith('Generic hadoop option.')) {
+				return -1;
+			}
+			return opt1.opt.compareToIgnoreCase(opt2.opt)	
+		}
+	}
+	
 }
