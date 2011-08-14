@@ -1,0 +1,84 @@
+body, .header-wrapper, .content-wrapper, .footer-wrapper {
+  margin: 0.5em 1em 0.5em 1em;
+  padding: 0 1em 0 1em;
+  -moz-border-radius: 20px;
+   border-radius: 20px;
+}
+
+html {
+  min-width: 800px;
+}
+
+div.header-wrapper {
+  border-bottom: 0px solid #00005a;
+  
+  background: #00005a; /* for non-css3 browsers */
+
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6868a0', endColorstr='#00005a'); /* for IE */
+  background: -webkit-gradient(linear, left top, left bottom, from(#6868a0), to(#00005a)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #6868a0,  #00005a); /* for firefox 3.6+ */ 
+}
+
+div.header p.logo {
+    margin-top: -5px;
+}
+
+div.footer-wrapper {
+  border-top: 0px solid #babdb6;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  min-height: 50px;
+  background: #00005a; /* for non-css3 browsers */
+
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6868a0', endColorstr='#00005a'); /* for IE */
+  background: -webkit-gradient(linear, left top, left bottom, from(#6868a0), to(#00005a)); /* for webkit browsers */
+  background: -moz-linear-gradient(top,  #6868a0,  #00005a); /* for firefox 3.6+ */ 
+}
+
+div.footer, div.footer a {
+  color: #ffffff;
+}
+
+div.footer a {
+  text-decoration: none;
+}
+
+div.header, div.content, div.footer {
+  width: inherit;
+}
+
+div.header div.rel a {
+  color: #ffffff;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+div.header div.rel {
+  color:#ffffff;
+}
+
+div.body {
+    padding-right: 1.5em;
+    margin-right: 0.5em;
+    border-right: solid 1px #3465A4;
+}
+
+div.document {
+  width: 80%;
+}
+
+a {
+  color: #67448e;
+}
+
+div.sidebar li.toctree-l1.current a {
+  border-right: 5px solid #67448e;
+}
+
+
+
+/* The sidebar on the right hand side */
+div.content > div.sidebar {
+  width: 20%;
+}
+
