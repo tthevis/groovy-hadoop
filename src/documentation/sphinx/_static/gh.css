@@ -1,5 +1,12 @@
-body, .header-wrapper, .content-wrapper, .footer-wrapper {
+body, .content-wrapper, .footer-wrapper {
   margin: 0.5em 1em 0.5em 1em;
+  padding: 0 1em 0 1em;
+  -moz-border-radius: 20px;
+   border-radius: 20px;
+}
+
+.header-wrapper {
+  margin: 2em 1em 0.5em 1em;
   padding: 0 1em 0 1em;
   -moz-border-radius: 20px;
    border-radius: 20px;
